@@ -61,6 +61,7 @@ char load(ImlibImage * im, ImlibProgressFunction progress,
   uint8_t *bgra = NULL;
   int decoded_image_used = 0;
   int y=0;
+  char retcode = 0;
   
   if(im->data)
     return 0;
@@ -137,10 +138,7 @@ char load(ImlibImage * im, ImlibProgressFunction progress,
     decoded_image_used = 1;
     if(progress)
       progress(im, 100, 0, 0, w, h);
-    return 1;
   }
-
-  
 
 EXIT:
   if (f) fclose(f);
@@ -148,7 +146,7 @@ EXIT:
   if (img) bpg_decoder_close(img);
   if ((!decoded_image_used) && bgra) free(bgra);
 
-  return 0;
+  return retcode;
 }
 
 char save(ImlibImage *im, ImlibProgressFunction progress,

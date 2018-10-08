@@ -1,6 +1,6 @@
 include commands.mk
 
-BPGDIR=/mnt/src/p/libbpg-0.9.3
+BPGDIR=/mnt/src/git/libbpg/
 
 OPTS    := -O2
 CFLAGS  := -std=c99 $(OPTS) $(shell imlib2-config --cflags) -fPIC -Wall -I${BPGDIR}
@@ -23,7 +23,9 @@ endif
 all: bpg.so
 
 bpg.so: $(OBJ)
-	$(CC) -shared -o $@ $^ $(LDFLAGS)
+	$(CC) -shared -o $@ $^ $(LDFLAGS) 
+	cp $@ $@.debug
+	strip $@
 
 %.o: %.c
 	$(CC) -Wp,-MMD,$*.d -c $(CFLAGS) -o $@ $<
