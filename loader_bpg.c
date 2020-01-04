@@ -131,7 +131,6 @@ char load(ImlibImage * im, ImlibProgressFunction progress,
     SET_FLAGS(im->flags, F_HAS_ALPHA);
     
     im->format = strdup("bpg");
-    retcode = 1;
   }
 
   if((!im->data && im->loader) || immediate_load || progress) {
@@ -140,6 +139,7 @@ char load(ImlibImage * im, ImlibProgressFunction progress,
     if(progress)
       progress(im, 100, 0, 0, w, h);
   }
+  retcode = 1;
 
 EXIT:
   if (f) fclose(f);
