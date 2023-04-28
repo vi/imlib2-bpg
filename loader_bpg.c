@@ -40,18 +40,13 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#include <Imlib2.h>
-
-#include "imlib2_common.h"
-#include "loader.h"
+#include <Imlib2_Loader.h>
 
 #include <inttypes.h>
 #include "libbpg.h"
 
-char load(ImlibImage * im, ImlibProgressFunction progress,
-          char progress_granularity, char immediate_load)
+static int load(ImlibImage * im, int load_data)
 {
-  
   int w,h;
   uint8_t *buf = NULL;
   int buf_len, buf_len_max;
@@ -67,7 +62,10 @@ char load(ImlibImage * im, ImlibProgressFunction progress,
     return 0;
 
 
-  f = fopen(im->real_file, "rb");
+  // Note: this code was adapted to new Imlib2 loader API without reading the documentation.
+  // I don't know why im->fi is'nt just a plain filename.
+
+  f = fopen(im->fi->name, "rb");
   if (!f) {
         goto EXIT;
   }
@@ -121,23 +119,22 @@ char load(ImlibImage * im, ImlibProgressFunction progress,
   bpg_decoder_close(img); img = NULL;
   
   
-  if(!im->loader && !im->data) {
+  if(!im->data) {
     im->w = w;
     im->h = h;
 
     if(!IMAGE_DIMENSIONS_OK(w, h))
       goto EXIT;
 
-    SET_FLAGS(im->flags, F_HAS_ALPHA);
-    
-    im->format = strdup("bpg");
+    im->has_alpha = 1;
   }
 
-  if((!im->data && im->loader) || immediate_load || progress) {
-    im->data = (DATA32*)bgra;
+  if((!im->data) || load_data) {
+    im->data = bgra;
     decoded_image_used = 1;
-    if(progress)
-      progress(im, 100, 0, 0, w, h);
+    if(im->lc) {
+      __imlib_LoadProgress(im, 0, 0, im->w, im->h);
+    }
   }
   retcode = 1;
 
@@ -150,19 +147,5 @@ EXIT:
   return retcode;
 }
 
-char save(ImlibImage *im, ImlibProgressFunction progress,
-          char progress_granularity)
-{
-  return 0;
-}
-
-void formats(ImlibLoader *l)
-{
-  int i;
-  char *list_formats[] = { "bpg" };
-
-  l->num_formats = (sizeof(list_formats) / sizeof(char *));
-  l->formats     = malloc(sizeof(char *) * l->num_formats);
-  for(i = 0 ; i < l->num_formats ; i++)
-    l->formats[i] = strdup(list_formats[i]);
-}
+static const char *formats[] = {"bpg"};
+IMLIB_LOADER(formats, load, NULL);

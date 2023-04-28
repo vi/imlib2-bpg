@@ -1,10 +1,10 @@
 include commands.mk
 
-BPGDIR=/mnt/src/git/libbpg/
+BPGDIR=/home/vi/src/libbpg/
 
 OPTS    := -O2
-CFLAGS  := -std=c99 $(OPTS) $(shell imlib2-config --cflags) -fPIC -Wall -I${BPGDIR}
-LDFLAGS := $(shell imlib2-config --libs) -L${BPGDIR} -lbpg
+CFLAGS  := -std=c99 $(OPTS) $(shell pkg-config imlib2 --cflags) -fPIC -Wall -I${BPGDIR}
+LDFLAGS := $(shell pkg-config imlib2 --libs) -L${BPGDIR} -lbpg
 
 
 SRC = $(wildcard *.c)
